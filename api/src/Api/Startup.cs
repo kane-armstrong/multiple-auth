@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api
 {
@@ -21,13 +22,26 @@ namespace Api
         {
             services.AddControllers();
             var authenticationOptions = Configuration.GetSection("Authentication").Get<AuthenticationOptions>();
+            var firebaseProjectId = Configuration.GetSection("Firebase")["ProjectId"];
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                //.AddJwtBearer(options =>
+                //{
+                //    options.Authority = authenticationOptions.Authority;
+                //    options.Audience = authenticationOptions.Audience;
+                //    options.RequireHttpsMetadata = authenticationOptions.RequireHttps;
+                //})
                 .AddJwtBearer(options =>
-            {
-                options.Authority = authenticationOptions.Authority;
-                options.Audience = authenticationOptions.Audience;
-                options.RequireHttpsMetadata = authenticationOptions.RequireHttps;
-            });
+                {
+                    options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = options.Authority,
+                        ValidateAudience = true,
+                        ValidAudience = firebaseProjectId,
+                        ValidateLifetime = true
+                    };
+                });
             services.AddAuthorization();
         }
 

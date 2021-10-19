@@ -4,12 +4,15 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class TimeController : ControllerBase
     {
+        [Authorize]
         [HttpGet]
         public IActionResult Get() => Ok(DateTimeOffset.Now);
+
+        [HttpGet("utc")]
+        public IActionResult GetUtc() => Ok(DateTimeOffset.UtcNow);
     }
 }

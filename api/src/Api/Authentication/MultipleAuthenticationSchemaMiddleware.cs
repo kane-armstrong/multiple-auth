@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Api.Authentication
 {
@@ -16,23 +16,26 @@ namespace Api.Authentication
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var principal = new ClaimsPrincipal();
+            var result = await Authenticate(context);
 
-            var identityServerResult = await context.AuthenticateAsync();
-            if (identityServerResult?.Principal != null)
+            if (result.Succeeded)
             {
-                principal.AddIdentities(identityServerResult.Principal.Identities);
+                context.User = new ClaimsPrincipal(result.Principal.Identities);
+            }
+
+            await _next(context);
+        }
+
+        private static async Task<AuthenticateResult> Authenticate(HttpContext context)
+        {
+            var identityServerResult = await context.AuthenticateAsync();
+            if (identityServerResult.Succeeded)
+            {
+                return identityServerResult;
             }
 
             var firebaseResult = await context.AuthenticateAsync(AuthenticationConstants.FirebaseScheme);
-            if (firebaseResult?.Principal != null)
-            {
-                principal.AddIdentities(firebaseResult.Principal.Identities);
-            }
-
-            context.User = principal;
-
-            await _next(context);
+            return firebaseResult;
         }
     }
 }

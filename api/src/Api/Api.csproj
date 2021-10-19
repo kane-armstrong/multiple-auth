@@ -8,5 +8,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.20" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FirebaseAuthentication\FirebaseAuthentication.csproj" />
+  </ItemGroup>
+
 
 </Project>

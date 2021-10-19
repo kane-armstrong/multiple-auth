@@ -1,4 +1,5 @@
 using Api.Authentication;
+using FirebaseAuthentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Api
 {
@@ -26,6 +26,8 @@ namespace Api
             var authenticationOptions = Configuration.GetSection("Authentication").Get<AuthenticationOptions>();
             var firebaseProjectId = Configuration.GetSection("Firebase")["ProjectId"];
 
+            const string firebaseScheme = "Firebase";
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -33,22 +35,12 @@ namespace Api
                     options.Audience = authenticationOptions.Audience;
                     options.RequireHttpsMetadata = authenticationOptions.RequireHttps;
                 })
-                .AddJwtBearer(AuthenticationConstants.FirebaseScheme, options =>
-                {
-                    options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = options.Authority,
-                        ValidateAudience = true,
-                        ValidAudience = firebaseProjectId,
-                        ValidateLifetime = true
-                    };
-                });
+                .AddFirebaseAuthentication(firebaseProjectId, firebaseScheme);
 
             services.AddAuthorization(options =>
             {
-                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, AuthenticationConstants.FirebaseScheme);
+                // magic sauce for getting multiple providers to work
+                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, firebaseScheme);
                 defaultAuthorizationPolicyBuilder = defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
                 options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
             });

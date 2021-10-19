@@ -1,5 +1,6 @@
-using Api.Configuration;
+using Api.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,8 +22,10 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
             var authenticationOptions = Configuration.GetSection("Authentication").Get<AuthenticationOptions>();
             var firebaseProjectId = Configuration.GetSection("Firebase")["ProjectId"];
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -30,7 +33,7 @@ namespace Api
                     options.Audience = authenticationOptions.Audience;
                     options.RequireHttpsMetadata = authenticationOptions.RequireHttps;
                 })
-                .AddJwtBearer("Firebase", options =>
+                .AddJwtBearer(AuthenticationConstants.FirebaseScheme, options =>
                 {
                     options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -42,7 +45,13 @@ namespace Api
                         ValidateLifetime = true
                     };
                 });
-            services.AddAuthorization();
+
+            services.AddAuthorization(options =>
+            {
+                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, AuthenticationConstants.FirebaseScheme);
+                defaultAuthorizationPolicyBuilder = defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -56,6 +65,8 @@ namespace Api
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<MultipleAuthenticationSchemaMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

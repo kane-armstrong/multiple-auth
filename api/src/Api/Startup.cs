@@ -24,13 +24,13 @@ namespace Api
             var authenticationOptions = Configuration.GetSection("Authentication").Get<AuthenticationOptions>();
             var firebaseProjectId = Configuration.GetSection("Firebase")["ProjectId"];
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                //.AddJwtBearer(options =>
-                //{
-                //    options.Authority = authenticationOptions.Authority;
-                //    options.Audience = authenticationOptions.Audience;
-                //    options.RequireHttpsMetadata = authenticationOptions.RequireHttps;
-                //})
                 .AddJwtBearer(options =>
+                {
+                    options.Authority = authenticationOptions.Authority;
+                    options.Audience = authenticationOptions.Audience;
+                    options.RequireHttpsMetadata = authenticationOptions.RequireHttps;
+                })
+                .AddJwtBearer("Firebase", options =>
                 {
                     options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
                     options.TokenValidationParameters = new TokenValidationParameters

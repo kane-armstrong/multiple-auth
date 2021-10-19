@@ -66,8 +66,6 @@ namespace Api
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseMiddleware<MultipleAuthenticationSchemaMiddleware>();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -1,7 +1,7 @@
 ﻿{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "PetShop.Identity": {
+    "Identity": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

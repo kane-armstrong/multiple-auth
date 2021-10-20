@@ -13,3 +13,8 @@ but I'm not sure if I like using real identity providers. Transient
 test failures thanks to e.g. rate limits or network drops would suck.
 Local development experience would probably suck. Maybe providing
 custom AuthenticationHandler/AuthorizationHandlers?)
+
+The authorities used here are:
+
+* A local IdentityServer4 server
+* Firebase authentication

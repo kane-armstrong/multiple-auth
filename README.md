@@ -7,8 +7,7 @@ staged migration from one identity provider to another.
 
 Focus
 
-* Does it work (seems obvious it would)
-* Is there an appropriate solution (thinking of security)
+* Does it work (and what is the simplest/most secure way to make it work)
 * Is there a good way to test it? (Currently using integration tests,
 but I'm not sure if I like using real identity providers. Transient
 test failures thanks to e.g. rate limits or network drops would suck.

@@ -40,9 +40,9 @@ namespace Api
             services.AddAuthorization(options =>
             {
                 // magic sauce for getting multiple providers to work
-                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, firebaseScheme);
-                defaultAuthorizationPolicyBuilder = defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
-                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+                options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, firebaseScheme)
+                    .RequireAuthenticatedUser()
+                    .Build();
             });
         }
 
